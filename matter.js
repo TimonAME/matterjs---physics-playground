@@ -48,19 +48,25 @@ for (let i = 0; i < numberOfRectangle/4; i++ ) {
   Composite.add(engine.world, [circleA, circleB]);
 }
 */
+let box = Bodies.rectangle(50,50,200,20, {
+  frictionAir: 2,
+  density: 1,
+});
+Composite.add(engine.world, box);
+
+
 // render balls
-let numberOfBalls = 1000;
+let numberOfBalls = 10000;
 let ballSize = 15;
 let delay = ballSize*2;
 
 for (let i = 0; i < numberOfBalls; i++ ) {
   ((index) => {
     setTimeout(() => {
-      // Random number between -20 and +20
-      let random = Math.floor(Math.random() * 60) - 30;
-      let circle = Bodies.circle(matterContainer.clientWidth / 2 + random, -100, ballSize, { //Math.abs(random)
+      let spawnpoint = Math.floor(Math.random() * matterContainer.clientWidth);
+      let circle = Bodies.circle(spawnpoint, -100, ballSize, { //Math.abs(random)
         friction: 0.1,
-        frictionAir: 0.001,
+        frictionAir: 0.201,
         restitution: 0.4,
         density: 0.0001
       });
