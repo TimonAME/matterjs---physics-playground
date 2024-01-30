@@ -1,5 +1,6 @@
 const matterContainer = document.querySelector("#matter-container");
 const THICCNESS = 400;
+const { Constraint } = Matter;
 
 // module aliases
 var Engine = Matter.Engine,
@@ -24,41 +25,87 @@ var render = Render.create({
   }
 });
 
-// render balls
-let rectangleSize = 50;
+// render rectangles
+/*
+let rectangleSize = 80;
 let numberOfRectangle = matterContainer.clientHeight / rectangleSize;
 
 let rectangleFriction = 1;
 let rectangleFrictionAir = 0.02;
 let rectangleRestitution = 0;
 
-for (let i = 0; i < numberOfRectangle; i++ ) {
-  let circleA = Bodies.rectangle(matterContainer.clientWidth / 4*3, matterContainer.clientHeight - (rectangleSize * i) + rectangleSize/2, rectangleSize, rectangleSize, {
+for (let i = 0; i < numberOfRectangle/4; i++ ) {
+  let circleA = Bodies.rectangle(matterContainer.clientWidth / 4, matterContainer.clientHeight - (rectangleSize * i) + rectangleSize/2, rectangleSize, rectangleSize, {
     friction: rectangleFriction,
     frictionAir: rectangleFrictionAir,
     restitution: rectangleRestitution
   });
-  let circleB = Bodies.rectangle(matterContainer.clientWidth / 4*3 - rectangleSize, matterContainer.clientHeight - (rectangleSize * i) + rectangleSize/2, rectangleSize, rectangleSize, {
+  let circleB = Bodies.rectangle(matterContainer.clientWidth / 4*3, matterContainer.clientHeight - (rectangleSize * i) + rectangleSize/2, rectangleSize, rectangleSize, {
     friction: rectangleFriction,
     frictionAir: rectangleFrictionAir,
     restitution: rectangleRestitution
   });
-  let circleC = Bodies.rectangle(matterContainer.clientWidth / 4*3 + rectangleSize, matterContainer.clientHeight - (rectangleSize * i) + rectangleSize/2, rectangleSize, rectangleSize, {
-    friction: rectangleFriction,
-    frictionAir: rectangleFrictionAir,
-    restitution: rectangleRestitution
-  });
-  Composite.add(engine.world, [circleA, circleB, circleC]);
+  Composite.add(engine.world, [circleA, circleB]);
+}
+*/
+// render balls
+let numberOfBalls = 1000;
+let ballSize = 15;
+let delay = ballSize*2;
+
+for (let i = 0; i < numberOfBalls; i++ ) {
+  ((index) => {
+    setTimeout(() => {
+      // Random number between -20 and +20
+      let random = Math.floor(Math.random() * 60) - 30;
+      let circle = Bodies.circle(matterContainer.clientWidth / 2 + random, -100, ballSize, { //Math.abs(random)
+        friction: 0.1,
+        frictionAir: 0.001,
+        restitution: 0.4,
+        density: 0.0001
+      });
+      Composite.add(engine.world, circle);
+    }, index * delay);
+  })(i);
 }
 
-let circle = Bodies.circle(40, 40, 30, {
-  friction: 0.1,
-  frictionAir: 0.00001,
-  restitution: 0.5
+// Create the rotor as a single rectangle
+let rotor = Bodies.rectangle(matterContainer.clientWidth / 2, matterContainer.clientHeight / 2, matterContainer.clientHeight - 10, 20);
+
+// Add the rotor to the world
+Composite.add(engine.world, rotor);
+
+// Create a constraint to fix the rotor in place
+let constraint = Constraint.create({
+  pointA: { x: matterContainer.clientWidth / 2, y: matterContainer.clientHeight / 2 },
+  bodyB: rotor,
+  stiffness: 1
 });
-Composite.add(engine.world, circle);
+
+// Add the constraint to the world
+Composite.add(engine.world, constraint);
+
+// Rotate the rotor
+
+setInterval(() => {
+  Matter.Body.rotate(rotor, 0.02);
+}, 10);
 
 
+// Check for balls to remove every 60ms
+setInterval(function() {
+  let bodies = Composite.allBodies(engine.world);
+
+  for (let i = 0; i < bodies.length; i++) {
+    if (bodies[i].position.y > matterContainer.clientHeight) {
+      // Remove the body when it falls off the screen
+      Composite.remove(engine.world, bodies[i]);
+    }
+  }
+}, 100);
+
+
+/*
 var ground = Bodies.rectangle(
   matterContainer.clientWidth / 2,
   matterContainer.clientHeight + THICCNESS / 2,
@@ -66,6 +113,7 @@ var ground = Bodies.rectangle(
   THICCNESS,
   { isStatic: true }
 );
+*/
 
 let leftWall = Bodies.rectangle(
   0 - THICCNESS / 2,
@@ -86,7 +134,7 @@ let rightWall = Bodies.rectangle(
 );
 
 // add all of the bodies to the world
-Composite.add(engine.world, [ground, leftWall, rightWall]);
+Composite.add(engine.world, [leftWall, rightWall]); //ground, 
 
 let mouse = Matter.Mouse.create(render.canvas);
 let mouseConstraint = Matter.MouseConstraint.create(engine, {
@@ -126,6 +174,7 @@ function handleResize(matterContainer) {
   render.canvas.height = matterContainer.clientHeight;
 
   // reposition ground
+  /*
   Matter.Body.setPosition(
     ground,
     Matter.Vector.create(
@@ -133,6 +182,7 @@ function handleResize(matterContainer) {
       matterContainer.clientHeight + THICCNESS / 2
     )
   );
+  */
 
   // reposition right wall
   Matter.Body.setPosition(
