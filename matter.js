@@ -25,24 +25,39 @@ var render = Render.create({
 });
 
 // render balls
-let numberOfBalls = 200;
-let ballSize = 20;
-let delay = ballSize*2;
+let rectangleSize = 50;
+let numberOfRectangle = matterContainer.clientHeight / rectangleSize;
 
-for (let i = 0; i < numberOfBalls; i++ ) {
-  ((index) => {
-    setTimeout(() => {
-      // Random number between -20 and +20
-      let random = Math.floor(Math.random() * 60) - 30;
-      let circle = Bodies.circle(matterContainer.clientWidth / 2 + random, 10, ballSize, {
-        friction: 0.1,
-        frictionAir: 0.00001,
-        restitution: 0.8
-      });
-      Composite.add(engine.world, circle);
-    }, index * delay);
-  })(i);
+let rectangleFriction = 1;
+let rectangleFrictionAir = 0.02;
+let rectangleRestitution = 0;
+
+for (let i = 0; i < numberOfRectangle; i++ ) {
+  let circleA = Bodies.rectangle(matterContainer.clientWidth / 4*3, matterContainer.clientHeight - (rectangleSize * i) + rectangleSize/2, rectangleSize, rectangleSize, {
+    friction: rectangleFriction,
+    frictionAir: rectangleFrictionAir,
+    restitution: rectangleRestitution
+  });
+  let circleB = Bodies.rectangle(matterContainer.clientWidth / 4*3 - rectangleSize, matterContainer.clientHeight - (rectangleSize * i) + rectangleSize/2, rectangleSize, rectangleSize, {
+    friction: rectangleFriction,
+    frictionAir: rectangleFrictionAir,
+    restitution: rectangleRestitution
+  });
+  let circleC = Bodies.rectangle(matterContainer.clientWidth / 4*3 + rectangleSize, matterContainer.clientHeight - (rectangleSize * i) + rectangleSize/2, rectangleSize, rectangleSize, {
+    friction: rectangleFriction,
+    frictionAir: rectangleFrictionAir,
+    restitution: rectangleRestitution
+  });
+  Composite.add(engine.world, [circleA, circleB, circleC]);
 }
+
+let circle = Bodies.circle(40, 40, 30, {
+  friction: 0.1,
+  frictionAir: 0.00001,
+  restitution: 0.5
+});
+Composite.add(engine.world, circle);
+
 
 var ground = Bodies.rectangle(
   matterContainer.clientWidth / 2,
